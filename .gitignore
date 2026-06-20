@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+.pnp/
+
+# build output
+dist/
+build/
+*.tsbuildinfo
+
+# env
+.env
+.env.local
+*.local
+
+# logs
+logs/
+*.log
+npm-debug.log*
+
+# docker volumes (local data)
+.data/
+
+# editor
+.vscode/
+.idea/
+.DS_Store

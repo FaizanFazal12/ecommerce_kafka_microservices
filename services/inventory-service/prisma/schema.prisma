@@ -1,0 +1,60 @@
+// Inventory Service data model.
+// Owns stock + reservations, plus its own outbox and consumer-dedup tables.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id           String @id @db.Uuid // = productId from the catalog
+  availableQty Int // sellable now
+  reservedQty  Int    @default(0) // held for in-flight orders
+
+  @@map("products")
+}
+
+enum ReservationStatus {
+  RESERVED
+  RELEASED // compensated after an order cancellation
+}
+
+model Reservation {
+  id        String            @id @default(uuid()) @db.Uuid
+  orderId   String            @unique @db.Uuid // one reservation per order
+  status    ReservationStatus
+  items     Json // [{ productId, quantity }] — needed to restore stock on release
+  createdAt DateTime          @default(now())
+
+  @@map("reservations")
+}
+
+// Layer 2 — transactional outbox
+model OutboxEvent {
+  id            String    @id @default(uuid()) @db.Uuid
+  aggregateType String
+  aggregateId   String    @db.Uuid
+  topic         String
+  partitionKey  String
+  eventType     String
+  payload       Json
+  createdAt     DateTime  @default(now())
+  publishedAt   DateTime?
+
+  @@index([publishedAt, createdAt])
+  @@map("outbox_events")
+}
+
+// Layer 3 — consumer dedup
+model ProcessedEvent {
+  eventId     String   @db.Uuid
+  consumer    String
+  processedAt DateTime @default(now())
+
+  @@id([eventId, consumer])
+  @@map("processed_events")
+}

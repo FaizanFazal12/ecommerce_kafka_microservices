@@ -1,0 +1,20 @@
+{
+  "name": "ecommerce-kafka-microservices",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Scalable event-driven e-commerce platform — idempotency + Kafka microservices",
+  "workspaces": [
+    "libs/*",
+    "services/*"
+  ],
+  "scripts": {
+    "infra:up": "docker compose up -d",
+    "infra:down": "docker compose down",
+    "infra:logs": "docker compose logs -f",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

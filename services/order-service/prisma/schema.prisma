@@ -1,0 +1,112 @@
+// Order Service data model.
+// Contains the tables for ALL THREE idempotency layers plus the saga state:
+//   - IdempotencyKey   -> Layer 1 (HTTP request dedup)
+//   - OutboxEvent      -> Layer 2 (reliable publishing)
+//   - ProcessedEvent   -> Layer 3 (consumer dedup)
+//   - Order / OrderItem-> business state + saga progress
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Business state
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum OrderStatus {
+  PENDING // created, saga in flight
+  CONFIRMED // payment + inventory both succeeded
+  CANCELLED // a leg failed -> compensations triggered
+}
+
+// State of one saga "leg". The order is CONFIRMED only when both legs are SUCCEEDED.
+enum LegStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+model Order {
+  id               String      @id @default(uuid()) @db.Uuid
+  customerId       String      @db.Uuid
+  status           OrderStatus @default(PENDING)
+  // Saga progress tracked as two independent legs.
+  paymentStatus    LegStatus   @default(PENDING)
+  inventoryStatus  LegStatus   @default(PENDING)
+  totalAmountCents Int
+  currency         String      @default("USD")
+  correlationId    String      @db.Uuid
+  items            OrderItem[]
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  @@index([customerId])
+  @@map("orders")
+}
+
+model OrderItem {
+  id             String @id @default(uuid()) @db.Uuid
+  orderId        String @db.Uuid
+  order          Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId      String @db.Uuid
+  quantity       Int
+  unitPriceCents Int
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Layer 1 — HTTP request idempotency
+// ─────────────────────────────────────────────────────────────────────────────
+
+model IdempotencyKey {
+  key         String    @id @db.Uuid
+  requestHash String // hash of the request body; reusing a key with a new body is a client bug
+  status      String // IN_PROGRESS | COMPLETED
+  response    Json? // cached HTTP response, returned verbatim on replay
+  statusCode  Int? // cached HTTP status code
+  createdAt   DateTime  @default(now())
+  expiresAt   DateTime?
+
+  @@map("idempotency_keys")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Layer 2 — Transactional outbox (written in the SAME tx as the order)
+// ─────────────────────────────────────────────────────────────────────────────
+
+model OutboxEvent {
+  id            String    @id @default(uuid()) @db.Uuid
+  aggregateType String // e.g. "Order"
+  aggregateId   String    @db.Uuid // the order id
+  topic         String // Kafka topic to publish to
+  partitionKey  String // Kafka message key (= aggregateId) -> per-order ordering
+  eventType     String // e.g. "orders.created"
+  payload       Json // the full EventEnvelope, published verbatim
+  createdAt     DateTime  @default(now())
+  publishedAt   DateTime? // null = not yet sent; set after the broker ACKs
+
+  // The relay scans for unpublished rows oldest-first.
+  @@index([publishedAt, createdAt])
+  @@map("outbox_events")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Layer 3 — Consumer dedup (one row per event this service has handled)
+// ─────────────────────────────────────────────────────────────────────────────
+
+model ProcessedEvent {
+  eventId     String   @db.Uuid
+  consumer    String // which consumer handled it (a topic may be read by several)
+  processedAt DateTime @default(now())
+
+  // Composite PK: the same event may be legitimately processed by different consumers.
+  @@id([eventId, consumer])
+  @@map("processed_events")
+}
