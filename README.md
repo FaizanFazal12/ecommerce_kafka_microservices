@@ -216,8 +216,8 @@ Because every step is idempotent, the saga can be safely retried at any point wi
 - [x] Order Service: HTTP idempotency + outbox + relay + saga consumers ✅ *typecheck passing*
 - [x] Payment & Inventory: idempotent consumers + saga + compensation ✅ *typecheck passing*
 - [x] Notification Service (terminal consumer, no outbox) ✅ *typecheck passing*
+- [x] Load test (k6) showing duplicate requests → single charge — [`load-tests/`](load-tests/)
 - [ ] DLQ + retry policy
-- [ ] Load test (k6) showing duplicate requests → single charge
 
 > **End-to-end status:** the full saga now runs — `orders.created` → Payment +
 > Inventory react in parallel → Order Service settles to `CONFIRMED` or
