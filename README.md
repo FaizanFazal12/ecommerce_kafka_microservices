@@ -215,7 +215,7 @@ Because every step is idempotent, the saga can be safely retried at any point wi
 - [x] `docker-compose.yml` (Kafka KRaft + Postgres + Redis + Kafka UI)
 - [x] Order Service: HTTP idempotency + outbox + relay + saga consumers ✅ *typecheck passing*
 - [x] Payment & Inventory: idempotent consumers + saga + compensation ✅ *typecheck passing*
-- [ ] Notification Service
+- [x] Notification Service (terminal consumer, no outbox) ✅ *typecheck passing*
 - [ ] DLQ + retry policy
 - [ ] Load test (k6) showing duplicate requests → single charge
 
@@ -269,6 +269,7 @@ Watch every event hop live in **Kafka UI** at <http://localhost:8080>.
 | order-service | 3001 | accepts orders, coordinates the saga |
 | payment-service | 3002 | charges (declines totals ending in `13`) |
 | inventory-service | 3003 | reserves stock, releases on cancel |
+| notification-service | 3004 | emails customer on confirm / payment failure |
 
 ---
 

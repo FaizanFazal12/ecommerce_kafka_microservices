@@ -1,0 +1,43 @@
+// Notification Service data model.
+// A TERMINAL consumer: it reacts to events but emits none, so it needs NO outbox.
+// It still needs the consumer-dedup table so a redelivered event can't send a
+// duplicate email.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum NotificationKind {
+  ORDER_CONFIRMED
+  PAYMENT_FAILED
+}
+
+// A record of every notification "sent" (here: logged). Useful to prove dedup —
+// exactly one row per order/kind no matter how many times the event is delivered.
+model Notification {
+  id         String           @id @default(uuid()) @db.Uuid
+  orderId    String           @db.Uuid
+  customerId String           @db.Uuid
+  kind       NotificationKind
+  channel    String           @default("email")
+  body       String
+  sentAt     DateTime         @default(now())
+
+  @@unique([orderId, kind]) // belt-and-suspenders: one notification per order+kind
+  @@map("notifications")
+}
+
+// Layer 3 — consumer dedup
+model ProcessedEvent {
+  eventId     String   @db.Uuid
+  consumer    String
+  processedAt DateTime @default(now())
+
+  @@id([eventId, consumer])
+  @@map("processed_events")
+}
