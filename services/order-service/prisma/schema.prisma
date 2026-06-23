@@ -7,6 +7,10 @@
 
 generator client {
   provider = "prisma-client-js"
+  // Service-local output so each service owns its own client. Without this, the
+  // npm-workspace-hoisted @prisma/client at the repo root is shared and every
+  // `prisma generate` clobbers the previous service's models.
+  output = "../src/generated/prisma"
 }
 
 datasource db {

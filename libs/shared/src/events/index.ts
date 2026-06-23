@@ -1,5 +1,6 @@
 export * from './envelope';
 export * from './topics';
+export * from './dlq';
 export * from './event-factory';
 export * from './order-events';
 export * from './payment-events';

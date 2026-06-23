@@ -9,6 +9,10 @@ export interface AppConfig {
     clientId: string;
     consumerGroup: string;
   };
+  consumer: {
+    maxRetries: number;
+    retryBackoffMs: number;
+  };
   outbox: {
     pollIntervalMs: number;
     batchSize: number;
@@ -25,6 +29,10 @@ export default (): AppConfig => ({
     brokers: (process.env.KAFKA_BROKERS ?? 'localhost:9092').split(','),
     clientId: process.env.KAFKA_CLIENT_ID ?? 'order-service',
     consumerGroup: process.env.KAFKA_CONSUMER_GROUP ?? 'order-service',
+  },
+  consumer: {
+    maxRetries: parseInt(process.env.CONSUMER_MAX_RETRIES ?? '3', 10),
+    retryBackoffMs: parseInt(process.env.CONSUMER_RETRY_BACKOFF_MS ?? '500', 10),
   },
   outbox: {
     pollIntervalMs: parseInt(process.env.OUTBOX_POLL_INTERVAL_MS ?? '1000', 10),

@@ -3,6 +3,7 @@ export interface AppConfig {
   serviceName: string;
   databaseUrl: string;
   kafka: { brokers: string[]; clientId: string; consumerGroup: string };
+  consumer: { maxRetries: number; retryBackoffMs: number };
 }
 
 export default (): AppConfig => ({
@@ -13,5 +14,9 @@ export default (): AppConfig => ({
     brokers: (process.env.KAFKA_BROKERS ?? 'localhost:9092').split(','),
     clientId: process.env.KAFKA_CLIENT_ID ?? 'notification-service',
     consumerGroup: process.env.KAFKA_CONSUMER_GROUP ?? 'notification-service',
+  },
+  consumer: {
+    maxRetries: parseInt(process.env.CONSUMER_MAX_RETRIES ?? '3', 10),
+    retryBackoffMs: parseInt(process.env.CONSUMER_RETRY_BACKOFF_MS ?? '500', 10),
   },
 });
