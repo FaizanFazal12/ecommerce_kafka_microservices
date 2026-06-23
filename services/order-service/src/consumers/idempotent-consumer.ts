@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../prisma/client';
 import { EventEnvelope } from '@ecommerce/shared';
 import { PrismaService } from '../prisma/prisma.service';
 

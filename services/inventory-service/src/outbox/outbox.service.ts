@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../prisma/client';
 import { EventEnvelope } from '@ecommerce/shared';
 
 /** Write side of the outbox (Layer 2). Stage an event inside the caller's tx. */

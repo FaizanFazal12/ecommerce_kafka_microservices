@@ -5,6 +5,8 @@
 
 generator client {
   provider = "prisma-client-js"
+  // Service-local output so each service owns its own client (see ADR / monorepo note).
+  output = "../src/generated/prisma"
 }
 
 datasource db {

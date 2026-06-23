@@ -169,7 +169,8 @@ Because every step is idempotent, the saga can be safely retried at any point wi
 |---|---|
 | Lost events | Transactional outbox + at-least-once relay |
 | Duplicate events | `processed_events` dedup table per consumer |
-| Poison messages | Dead-letter topic (`*.DLQ`) after N retries |
+| Transient failures | Bounded consumer retry with linear backoff (`CONSUMER_MAX_RETRIES`) — ✅ implemented |
+| Poison messages | Routed to a dead-letter topic (`*.DLQ`) with failure metadata after retries — ✅ implemented |
 | Ordering | Partition key = `order_id` |
 | Schema evolution | Schema Registry + Avro/JSON (backward-compatible) |
 | Observability | Correlation/request id propagated through every event header |
@@ -217,7 +218,8 @@ Because every step is idempotent, the saga can be safely retried at any point wi
 - [x] Payment & Inventory: idempotent consumers + saga + compensation ✅ *typecheck passing*
 - [x] Notification Service (terminal consumer, no outbox) ✅ *typecheck passing*
 - [x] Load test (k6) showing duplicate requests → single charge — [`load-tests/`](load-tests/)
-- [ ] DLQ + retry policy
+- [x] DLQ + retry policy (bounded retry → `*.DLQ`) ✅ *all services typecheck-clean*
+- [ ] API Gateway (auth + rate limiting)
 
 > **End-to-end status:** the full saga now runs — `orders.created` → Payment +
 > Inventory react in parallel → Order Service settles to `CONFIRMED` or

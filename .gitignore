@@ -7,6 +7,9 @@ dist/
 build/
 *.tsbuildinfo
 
+# generated Prisma clients (per-service; recreated by `prisma generate`)
+services/*/src/generated/
+
 # env
 .env
 .env.local
