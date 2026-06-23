@@ -36,7 +36,7 @@ npm run start:dev          # listens on :3000, proxies to :3001
 ## Demo
 
 ```bash
-CUSTOMER=11111111-1111-1111-1111-111111111111
+CUSTOMER=22222222-2222-4222-8222-222222222222
 
 # 1. get a token
 TOKEN=$(curl -s -X POST localhost:3000/auth/token \
@@ -49,13 +49,13 @@ curl -i -X POST localhost:3000/orders \
   -H "Authorization: Bearer $TOKEN" \
   -H "Idempotency-Key: $(uuidgen)" \
   -H 'Content-Type: application/json' \
-  -d '{ "items": [ { "productId": "22222222-2222-2222-2222-222222222222", "quantity": 1, "unitPriceCents": 4999 } ] }'
+  -d '{ "items": [ { "productId": "11111111-1111-4111-8111-111111111111", "quantity": 1, "unitPriceCents": 4999 } ] }'
 
 # 3. hammer it to see 429s once you exceed RATE_LIMIT_MAX in the window
 for i in $(seq 1 30); do
   curl -s -o /dev/null -w "%{http_code} " -X POST localhost:3000/orders \
     -H "Authorization: Bearer $TOKEN" -H "Idempotency-Key: $(uuidgen)" \
-    -H 'Content-Type: application/json' -d '{"items":[{"productId":"22222222-2222-2222-2222-222222222222","quantity":1,"unitPriceCents":100}]}'
+    -H 'Content-Type: application/json' -d '{"items":[{"productId":"11111111-1111-4111-8111-111111111111","quantity":1,"unitPriceCents":100}]}'
 done; echo
 ```
 

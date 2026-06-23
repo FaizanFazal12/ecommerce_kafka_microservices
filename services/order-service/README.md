@@ -58,9 +58,9 @@ curl -i -X POST localhost:3001/orders \
   -H "Content-Type: application/json" \
   -H "Idempotency-Key: $KEY" \
   -d '{
-    "customerId": "11111111-1111-1111-1111-111111111111",
+    "customerId": "22222222-2222-4222-8222-222222222222",
     "items": [
-      { "productId": "22222222-2222-2222-2222-222222222222", "quantity": 2, "unitPriceCents": 1999 }
+      { "productId": "11111111-1111-4111-8111-111111111111", "quantity": 2, "unitPriceCents": 1999 }
     ]
   }'
 
@@ -69,8 +69,8 @@ curl -i -X POST localhost:3001/orders \
 curl -i -X POST localhost:3001/orders \
   -H "Content-Type: application/json" \
   -H "Idempotency-Key: $KEY" \
-  -d '{ "customerId": "11111111-1111-1111-1111-111111111111",
-        "items": [ { "productId": "22222222-2222-2222-2222-222222222222", "quantity": 2, "unitPriceCents": 1999 } ] }'
+  -d '{ "customerId": "22222222-2222-4222-8222-222222222222",
+        "items": [ { "productId": "11111111-1111-4111-8111-111111111111", "quantity": 2, "unitPriceCents": 1999 } ] }'
 ```
 
 Watch the event flow in Kafka UI at <http://localhost:8080> — you'll see exactly

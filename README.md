@@ -4,6 +4,10 @@
 
 **Stack:** Node.js · NestJS · TypeScript · Apache Kafka · PostgreSQL · Redis · Docker Compose
 
+> 📖 **New to the codebase?** Read [docs/PROJECT_GUIDE.md](docs/PROJECT_GUIDE.md) — a
+> file-by-file walkthrough of the flow and the code. This README is the high-level pitch;
+> the guide is how you actually find your way around.
+
 ---
 
 ## 1. The Problem This Solves
@@ -252,8 +256,8 @@ npm run build -w @ecommerce/shared
 curl -s -X POST localhost:3001/orders \
   -H "Content-Type: application/json" \
   -H "Idempotency-Key: $(uuidgen)" \
-  -d '{ "customerId": "11111111-1111-1111-1111-111111111111",
-        "items": [ { "productId": "22222222-2222-2222-2222-222222222222", "quantity": 2, "unitPriceCents": 2000 } ] }'
+  -d '{ "customerId": "22222222-2222-4222-8222-222222222222",
+        "items": [ { "productId": "11111111-1111-4111-8111-111111111111", "quantity": 2, "unitPriceCents": 2000 } ] }'
 
 # total = 4000 cents -> payment succeeds, stock reserved -> order CONFIRMED
 # GET the order to watch it go PENDING -> CONFIRMED:

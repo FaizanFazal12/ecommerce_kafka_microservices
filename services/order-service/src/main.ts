@@ -18,13 +18,14 @@ async function bootstrap(): Promise<void> {
   );
   app.enableShutdownHooks(); // so OnModuleDestroy hooks fire (disconnect Kafka/DB cleanly)
 
-  // Start Kafka consumption AFTER all OnModuleInit hooks have registered their
-  // handlers (the SagaConsumer registers in its onModuleInit).
-  await app.get(KafkaConsumerService).start();
-
   const config = app.get(ConfigService);
   const port = config.get<number>('port')!;
+  // listen() runs the OnModuleInit hooks — including SagaConsumer.onModuleInit,
+  // which registers the topic handlers. We MUST start the Kafka consumer only
+  // after that, or routes would be empty and start() would no-op.
   await app.listen(port);
+
+  await app.get(KafkaConsumerService).start();
   logger.log(`order-service listening on :${port}`);
 }
 

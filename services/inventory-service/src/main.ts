@@ -10,11 +10,12 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   app.enableShutdownHooks();
 
-  // Start consuming after handlers are registered in their onModuleInit hooks.
-  await app.get(KafkaConsumerService).start();
-
   const port = app.get(ConfigService).get<number>('port')!;
+  // listen() runs the onModuleInit hooks that register the topic handlers; only
+  // then can the consumer start (otherwise routes are empty and start() no-ops).
   await app.listen(port);
+
+  await app.get(KafkaConsumerService).start();
   logger.log(`inventory-service listening on :${port}`);
 }
 
