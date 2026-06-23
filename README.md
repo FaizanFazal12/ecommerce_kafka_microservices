@@ -219,7 +219,10 @@ Because every step is idempotent, the saga can be safely retried at any point wi
 - [x] Notification Service (terminal consumer, no outbox) ✅ *typecheck passing*
 - [x] Load test (k6) showing duplicate requests → single charge — [`load-tests/`](load-tests/)
 - [x] DLQ + retry policy (bounded retry → `*.DLQ`) ✅ *all services typecheck-clean*
-- [ ] API Gateway (auth + rate limiting)
+- [x] API Gateway: JWT auth + Redis rate limiting + request tracing + reverse proxy ✅ *typecheck + build clean*
+
+**🎉 All roadmap items complete.** Every service typechecks against real
+NestJS/Prisma/KafkaJS types and the gateway + a service build cleanly to `dist`.
 
 > **End-to-end status:** the full saga now runs — `orders.created` → Payment +
 > Inventory react in parallel → Order Service settles to `CONFIRMED` or
@@ -268,6 +271,7 @@ Watch every event hop live in **Kafka UI** at <http://localhost:8080>.
 
 | Service | Port | Role in the flow |
 |---|---|---|
+| api-gateway | 3000 | auth (JWT), rate limiting (Redis), tracing, reverse proxy |
 | order-service | 3001 | accepts orders, coordinates the saga |
 | payment-service | 3002 | charges (declines totals ending in `13`) |
 | inventory-service | 3003 | reserves stock, releases on cancel |
